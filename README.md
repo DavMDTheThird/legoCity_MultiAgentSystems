@@ -1,5 +1,5 @@
 # legoCity_MultiAgentSystems
 
-##Authors
+## Authors
 * David Medina Domínguez (A01783155)
 * Natalia Maya Bolaños (A01781992)
