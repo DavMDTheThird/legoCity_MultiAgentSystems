@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class CityMaker : MonoBehaviour
 {
+    [SerializeField] GameObject[] carPrefab;
     [SerializeField] TextAsset layout;
     [SerializeField] GameObject roadPrefab;
     [SerializeField] GameObject[] buildingPrefab;
@@ -89,6 +90,20 @@ public class CityMaker : MonoBehaviour
                 tile.transform.parent = transform;
                 x += 1;
             }
+
+            //maybe no sirve
+            else if (tiles[i] == 'C')
+            {
+                int rand = Random.Range(0, carPrefab.Length);
+                position = new Vector3(x * tileSize, 0, y * tileSize);
+                tile = Instantiate(carPrefab[rand], position, Quaternion.identity);
+                tile.transform.localScale = new Vector3(1, Random.Range(0.5f, 2.0f), 1);
+                tile.transform.parent = transform;
+                x += 1;
+            }
+
+            //este elif
+
             else if (tiles[i] == '\n')
             {
                 x = 0;
