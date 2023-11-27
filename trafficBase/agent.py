@@ -45,7 +45,6 @@ class Car(Agent):
         next_move = self.path[0]
 
         next_car = None
-        
         self_tf = None
 
         for agent in model.grid[self.pos[0]][self.pos[1]]:
@@ -55,6 +54,7 @@ class Car(Agent):
             if isinstance(agent, Car):
                 next_car = agent
 
+        # En semaforo
         if self_tf:
             if self_tf.state: 
                 if next_car == None:
@@ -64,14 +64,16 @@ class Car(Agent):
             else:
                 return False
             
+        # Coche adelate
         elif next_car:
-            # Esto siguiente me puede causar problemas ya que se pueden combinar coches en los cruces
-            if next_car.estado:
-                return True
-            else:
-                #Aqui va toda la mecanica de recalcular el a*
-                # self.can_changeLane()
-                return False
+            return False
+            # # Esto siguiente me puede causar problemas ya que se pueden combinar coches en los cruces
+            # if next_car.estado:
+            #     return True
+            # else:
+            #     #Aqui va toda la mecanica de recalcular el a*
+            #     # self.can_changeLane()
+            #     return False
         
         return True
 

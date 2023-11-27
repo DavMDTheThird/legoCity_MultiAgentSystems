@@ -107,7 +107,7 @@ class CityModel(Model):
             
         elif agent.direction == "Left":
             # quitar las calles que estan atrás o alado del agente
-            possible_steps = [step for step in possible_steps if step[0] < agent.pos[0]]
+            possible_steps = [step for step in possible_steps if step[0] < agent.pos[0]] # Le quito los de atras
 
             # quitar las calles que *vienen* hacia el agente
             possible_steps = [step for step in possible_steps if not 
