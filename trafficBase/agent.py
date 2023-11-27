@@ -1,6 +1,8 @@
 from mesa import Agent
 import networkx as nx
 import random
+import copy
+
 
 class Car(Agent):
     """
@@ -28,7 +30,7 @@ class Car(Agent):
         Determines if the agent can move in the direction that was chosen
         """
         if self.path == []:
-            self.calculate_ShortestPath()
+            self.calculate_ShortestPath(self.model.graph)
 
         if self.path:
             if self.canMove(model):
@@ -66,38 +68,84 @@ class Car(Agent):
             
         # Coche adelate
         elif next_car:
+            if self.changeLane():
+                return True
+
             return False
             # # Esto siguiente me puede causar problemas ya que se pueden combinar coches en los cruces
             # if next_car.estado:
             #     return True
             # else:
             #     #Aqui va toda la mecanica de recalcular el a*
-            #     # self.can_changeLane()
             #     return False
         
         return True
 
-    def calculate_ShortestPath(self):
+    def calculate_ShortestPath(self, graph):
         """ 
         Will calculate the shortest path to the destination, taking into account 3 steps ahead
         """
-        self.path = nx.astar_path(self.model.graph, self.pos, self.destinationAgent.pos, weight='weight')[1:]
+        self.path = nx.astar_path(graph, self.pos, self.destinationAgent.pos, weight='weight')[1:]
         # print(self.path)
 
-    def can_changeLane(self):
+
+    # def can_changeLane(self):
+    #     """
+    #     Determines is my car has no car on his sides
+    #     """
+
+
+    def changeLane(self):
         """ 
         Will calculate the shortest path if it can change lane
         """
-        successors = self.model.graph.successors(self.pos)
-        for i in successors:
-            print(i)
+        if len(self.path) >= 5:
+            # print("--------------",self.pos, "--------------", "changeLane")
+            successors = list(self.model.graph.successors(self.pos))
+            
+            # print(successors)
+            next_successors = []
+            for i in successors:
+                next_successors.append(list(self.model.graph.successors(i)))
+
+            successors = list(zip(successors, next_successors))
+
+            graph_copy = copy.deepcopy(self.model.graph)
+
+            for f in successors:
+                # print("f:", f)
+                next_step = self.model.grid[f[0][0]][f[0][1]]
+                for g in next_step:
+                    if isinstance(g, Car):
+                        # print("self.pos:", self.pos, "g.pos", g.pos)
+                        graph_copy[self.pos][g.pos]['weight'] = 1000
+
+                for h in f[1]:
+                    next_next_step = self.model.grid[h[0]][h[1]]
+                    for l in next_next_step:
+                        if isinstance(l, Car):
+                            # print("f:", f, "l.pos",l.pos)
+                            graph_copy[f[0]][l.pos]['weight'] = 1000
+                            
+            self.path = nx.astar_path(graph_copy, self.pos, self.destinationAgent.pos, weight='weight')[1:]
+
+            # Check if the path is valid
+            if self.path:
+                next_move_agents = self.model.grid[self.path[0][0]][self.path[0][1]]
+                for z in next_move_agents:
+                    if isinstance(z, Car):
+                        return False
+                
+            return True
+
+        else:
+            return False
 
     def step(self):
         """ 
         Determines the new direction it will take, and then moves
         """
         self.move(self.model)
-        # self.calculate_ShortestPath(self.model)
 #----------------------------------------------------------------------------------------------
 class Traffic_Light(Agent):
     """
