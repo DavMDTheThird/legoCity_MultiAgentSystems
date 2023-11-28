@@ -8,11 +8,8 @@ import networkx as nx
 class CityModel(Model):
     """ 
         Creates a model based on a city map.
-
-        Args:
-            N: Number of agents in the simulation
     """
-    def __init__(self, N):
+    def __init__(self):
 
         # Load the map dictionary. The dictionary maps the characters in the map file to the corresponding agent.
         dataDictionary = json.load(open("city_files/mapDictionary.json"))
@@ -70,8 +67,21 @@ class CityModel(Model):
         # print(self.graph.edges())
         # path = nx.astar_path(self.graph, (0,0), (19,1), weight='weight')
         # print(path)
+        # i = self.grid.coord_iter()
 
-        self.num_agents = N
+        # for agent, (x, y) in i:
+        #     print(agent, (x, y))
+        #     if isinstance(agent, Car):
+        #         print(agent.unique_id)
+                # agent.possibleSteps = self.get_nextPossibleSteps(agent)
+                # print(agent.unique_id, agent.possibleSteps)
+
+        # print("Aloo1", list(next(i)))
+        # print("Aloo2", list(next(i)))
+        # print("Aloo3", list(next(i)))
+        # print("Aloo4", list(next(i)))
+        # print("Aloo5", list(next(i)))
+
         self.running = True
 
     def step(self):
@@ -79,6 +89,20 @@ class CityModel(Model):
         self.deleteCars()
         self.schedule.step()
         self.datacollector.collect(self)
+
+        # i = self.grid.coord_iter()
+
+        # for agent, (x, y) in i:
+        #     # print(agent, (x, y))
+        #     # print(agent[0])
+        #     if isinstance(agent[0], Road):
+        #         print(agent[0].unique_id)
+
+        print("---------------- My Agents")
+        for agent in self.schedule.agents:
+            # print(agent)
+            if isinstance(agent, Car):
+                print(agent.unique_id, agent.pos)
 
     
     def get_nextPossibleSteps(self, agent):

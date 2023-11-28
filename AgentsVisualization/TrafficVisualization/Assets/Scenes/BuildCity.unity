@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -533,9 +533,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c7376b41e8cfe8ff91fb865d4a420f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  carPrefab:
-  - {fileID: 919132149155446097, guid: 16052cff731fccc43855a94cc5d545fc, type: 3}
-  layout: {fileID: 4900000, guid: 1bd49f2e04cdbec48bb774669bd2140d, type: 3}
+  layout: {fileID: 4900000, guid: bfeac8ff714169142baee66eaf3583c4, type: 3}
   roadPrefab: {fileID: 3240343348373693069, guid: 646fc54ff3078ce94bbdbd0f0d4c4a05, type: 3}
   buildingPrefab:
   - {fileID: 919132149155446097, guid: d2dfe8d1d3773574ebe9c23f114c0579, type: 3}
@@ -543,7 +541,7 @@ MonoBehaviour:
   - {fileID: 919132149155446097, guid: 8efc6044fb0affe4e9fc48721f18ffab, type: 3}
   - {fileID: 919132149155446097, guid: 1ea63b7a31e1c934793fbf379f36c8df, type: 3}
   - {fileID: 33555395739272859, guid: 10a584233fb38a918af771ddce837268, type: 3}
-  semaphorePrefab: {fileID: 919132149155446097, guid: eb87700039f201e42a4ffdadeb5266b5, type: 3}
+  semaphorePrefab: {fileID: 3557286530132645318, guid: 9bd4af0f4bdb8494a9da43dc43743f08, type: 3}
   tileSize: 1
 --- !u!4 &1457529884
 Transform:

@@ -12,15 +12,15 @@ class CityModel(Model):
         Args:
             N: Number of agents in the simulation
     """
-    def __init__(self, N):
+    def __init__(self):
 
         # Load the map dictionary. The dictionary maps the characters in the map file to the corresponding agent.
-        dataDictionary = json.load(open("city_files/mapDictionary.json"))
+        dataDictionary = json.load(open("randomAgents/city_files/mapDictionary.json"))
 
         self.traffic_lights = []
 
         # Load the map file. The map file is a text file where each character represents an agent.
-        with open('city_files/mio.txt') as baseFile:
+        with open('randomAgents/city_files/mio.txt') as baseFile:
             lines = baseFile.readlines()
             self.width = len(lines[0])-1
             self.height = len(lines)
@@ -71,7 +71,7 @@ class CityModel(Model):
         # path = nx.astar_path(self.graph, (0,0), (19,1), weight='weight')
         # print(path)
 
-        self.num_agents = N
+        # self.num_agents = N
         self.running = True
 
     def step(self):

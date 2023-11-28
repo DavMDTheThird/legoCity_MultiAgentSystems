@@ -10,8 +10,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 
 [Serializable]
-public class AgentData
-{
+public class AgentData{
     /*
     The AgentData class is used to store the data of each agent.
     
@@ -35,8 +34,7 @@ public class AgentData
 
 [Serializable]
 
-public class AgentsData
-{
+public class AgentsData{
     /*
     The AgentsData class is used to store the data of all the agents.
 
@@ -48,8 +46,7 @@ public class AgentsData
     public AgentsData() => this.positions = new List<AgentData>();
 }
 
-public class AgentController : MonoBehaviour
-{
+public class AgentController : MonoBehaviour{
     /*
     The AgentController class is used to control the agents in the simulation.
 
@@ -77,10 +74,11 @@ public class AgentController : MonoBehaviour
         dt (float): The delta time.
     */
     string serverUrl = "http://localhost:8585";
-    string getAgentsEndpoint = "/getAgents";
-    string getObstaclesEndpoint = "/getObstacles";
     string sendConfigEndpoint = "/init";
     string updateEndpoint = "/update";
+    string getAgentsEndpoint = "/getCars";
+    string getObstaclesEndpoint = "/getTrafficLights";
+    
     AgentsData agentsData, obstacleData;
     Dictionary<string, GameObject> agents;
     Dictionary<string, Vector3> prevPositions, currPositions;

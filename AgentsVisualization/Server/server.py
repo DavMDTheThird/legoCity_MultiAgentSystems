@@ -1,53 +1,38 @@
-# TC2008B. Sistemas Multiagentes y Gráficas Computacionales
-# Python flask server to interact with Unity. Based on the code provided by Sergio Ruiz.
-# Octavio Navarro. October 2023git 
-
 from flask import Flask, request, jsonify
 from randomAgents.model import CityModel
 from randomAgents.agent import Car, Traffic_Light, Destination, Obstacle, Road, Car_Generator
-
-# Size of the board:
-number_agents = 10
-width = 28
-height = 28
-randomModel = None
-currentStep = 0
 
 app = Flask("Traffic example")
 
 @app.route('/init', methods=['POST'])
 def initModel():
-    global currentStep, randomModel, number_agents, width, height
+    global randomModel, currentStep
+
+    currentStep = 0
 
     if request.method == 'POST':
-        number_agents = int(request.form.get('NAgents'))
-        width = int(request.form.get('width'))
-        height = int(request.form.get('height'))
-        currentStep = 0
+        randomModel = CityModel()
 
-        print(request.form)
-        print(number_agents, width, height)
-        randomModel = CityModel(number_agents, width, height)
+        return jsonify({"message":"Model initialized."})
 
-        return jsonify({"message":"Parameters recieved, model initiated."})
-
-@app.route('/getAgents', methods=['GET'])
-def getAgents():
+@app.route('/getCars', methods=['GET'])
+def getCars():
     global randomModel
 
     if request.method == 'GET':
-        agentPositions = [{"id": str(a.unique_id), "x": x, "y":1, "z":z} for a, (x, z) in randomModel.grid.coord_iter() if isinstance(a, Car)]
-
-        return jsonify({'positions':agentPositions})
-
-@app.route('/getObstacles', methods=['GET'])
-def getObstacles():
-    global randomModel
-
-    if request.method == 'GET':
-        carPositions = [{"id": str(a.unique_id), "x": x, "y":1, "z":z} for a, (x, z) in randomModel.grid.coord_iter() if isinstance(a, Obstacle)]
+        # carPositions = [{"id": str(s.unique_id), "x": x, "y":1, "z":z} for a, (x, z) in randomModel.grid.coord_iter() for s in a if isinstance(s, Car)]
+        carPositions = [{"id": str(a.unique_id), "x": a.pos[0], "y":1, "z":a.pos[1]} for a in randomModel.schedule.agents if isinstance(a, Car)]
 
         return jsonify({'positions':carPositions})
+
+@app.route('/getTrafficLights', methods=['GET'])
+def getTrafficLights():
+    global randomModel
+
+    if request.method == 'GET':
+        trafficLights = [{"id": str(a.unique_id), "x": a.pos[0], "y":1, "z":a.pos[1], "state": a.state, "direction": a.direction} for a in randomModel.schedule.agents if isinstance(a, Traffic_Light)]
+
+        return jsonify({'positions':trafficLights})
 
 @app.route('/update', methods=['GET'])
 def updateModel():
