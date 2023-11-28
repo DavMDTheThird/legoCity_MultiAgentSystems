@@ -3,8 +3,8 @@
 # Octavio Navarro. October 2023git 
 
 from flask import Flask, request, jsonify
-from randomAgents.model import RandomModel
-from randomAgents.agent import RandomAgent, ObstacleAgent
+from randomAgents.model import CityModel
+from randomAgents.agent import Car, Traffic_Light, Destination, Obstacle, Road, Car_Generator
 
 # Size of the board:
 number_agents = 10
@@ -27,7 +27,7 @@ def initModel():
 
         print(request.form)
         print(number_agents, width, height)
-        randomModel = RandomModel(number_agents, width, height)
+        randomModel = CityModel(number_agents, width, height)
 
         return jsonify({"message":"Parameters recieved, model initiated."})
 
@@ -36,7 +36,7 @@ def getAgents():
     global randomModel
 
     if request.method == 'GET':
-        agentPositions = [{"id": str(a.unique_id), "x": x, "y":1, "z":z} for a, (x, z) in randomModel.grid.coord_iter() if isinstance(a, RandomAgent)]
+        agentPositions = [{"id": str(a.unique_id), "x": x, "y":1, "z":z} for a, (x, z) in randomModel.grid.coord_iter() if isinstance(a, Car)]
 
         return jsonify({'positions':agentPositions})
 
@@ -45,7 +45,7 @@ def getObstacles():
     global randomModel
 
     if request.method == 'GET':
-        carPositions = [{"id": str(a.unique_id), "x": x, "y":1, "z":z} for a, (x, z) in randomModel.grid.coord_iter() if isinstance(a, ObstacleAgent)]
+        carPositions = [{"id": str(a.unique_id), "x": x, "y":1, "z":z} for a, (x, z) in randomModel.grid.coord_iter() if isinstance(a, Obstacle)]
 
         return jsonify({'positions':carPositions})
 
