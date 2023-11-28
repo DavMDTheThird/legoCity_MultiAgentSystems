@@ -57,7 +57,7 @@ public class CityMaker : MonoBehaviour
                 position = new Vector3(x * tileSize, 0, y * tileSize);
                 tile = Instantiate(roadPrefab, position, Quaternion.identity);
                 tile.transform.parent = transform;
-                tile = Instantiate(semaphorePrefab, position, Quaternion.identity);
+                tile = Instantiate(semaphorePrefab, position, Quaternion.Euler(270, 0, 0));
                 tile.transform.parent = transform;
                 x += 1;
             }
