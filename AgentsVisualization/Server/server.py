@@ -25,6 +25,16 @@ def getCars():
 
         return jsonify({'positions':carPositions})
 
+@app.route('/getDestinations', methods=['GET'])
+def getDestinations():
+    global randomModel
+
+    if request.method == 'GET':
+        DestinationsPositions = [{"id": str(s.unique_id), "x": x, "y":1, "z":z} for a, (x, z) in randomModel.grid.coord_iter() for s in a if isinstance(s, Destination)]
+        # DestinationsPositions = [{"id": str(a.unique_id), "x": a.pos[0], "y":1, "z":a.pos[1]} for a in randomModel.schedule.agents if isinstance(a, Destination)]
+
+        return jsonify({'positions':DestinationsPositions})
+
 @app.route('/getTrafficLights', methods=['GET'])
 def getTrafficLights():
     global randomModel
@@ -34,6 +44,26 @@ def getTrafficLights():
 
         return jsonify({'positions':trafficLights})
 
+@app.route('/getObstacles', methods=['GET'])
+def getObstacles():
+    global randomModel
+
+    if request.method == 'GET':
+        obstaclePositions = [{"id": str(s.unique_id), "x": x, "y":1, "z":z} for a, (x, z) in randomModel.grid.coord_iter() for s in a if isinstance(s, Obstacle)]
+
+        return jsonify({'positions':obstaclePositions})
+    
+
+@app.route('/getRoads', methods=['GET'])
+def getRoads():
+    global randomModel
+
+    if request.method == 'GET':
+        roadPositions = [{"id": str(s.unique_id), "x": x, "y":1, "z":z} for a, (x, z) in randomModel.grid.coord_iter() for s in a if isinstance(s, (Road, Traffic_Light, Car_Generator))]
+
+        return jsonify({'positions':roadPositions})
+
+    
 @app.route('/update', methods=['GET'])
 def updateModel():
     global currentStep, randomModel

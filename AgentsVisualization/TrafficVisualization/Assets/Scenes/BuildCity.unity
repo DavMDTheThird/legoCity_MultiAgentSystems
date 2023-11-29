@@ -458,6 +458,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Semaforo (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: cd975b41be52f1649ab5349d78a4edb3, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -520,7 +524,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1457529883
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -622,6 +626,57 @@ LightingSettings:
   m_PVRTiledBaking: 0
   m_NumRaysToShootPerTexel: -1
   m_RespectSceneVisibilityWhenBakingGI: 0
+--- !u!1 &1860941286
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1860941288}
+  - component: {fileID: 1860941287}
+  m_Layer: 0
+  m_Name: AgentController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1860941287
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1860941286}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 983bc179e80f15347a79dd7b044746e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  obstaclePrefab:
+  - {fileID: 919132149155446097, guid: d2dfe8d1d3773574ebe9c23f114c0579, type: 3}
+  - {fileID: 919132149155446097, guid: 8efc6044fb0affe4e9fc48721f18ffab, type: 3}
+  - {fileID: 919132149155446097, guid: 1ea63b7a31e1c934793fbf379f36c8df, type: 3}
+  agentPrefab: {fileID: 919132149155446097, guid: 16052cff731fccc43855a94cc5d545fc, type: 3}
+  floor: {fileID: 3240343348373693069, guid: 646fc54ff3078ce94bbdbd0f0d4c4a05, type: 3}
+  timeToUpdate: 5
+--- !u!4 &1860941288
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1860941286}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 10.998484, y: -2.0714939, z: 7.332402}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2098845046
 GameObject:
   m_ObjectHideFlags: 0
@@ -728,6 +783,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Semaforo
       objectReference: {fileID: 0}
+    - target: {fileID: 4960343767475556046, guid: 70b69fa9be0fdc744ac7442771f7f0b6, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5736880918107542644, guid: 70b69fa9be0fdc744ac7442771f7f0b6, type: 3}
       propertyPath: m_LocalPosition.x
       value: 12.08
@@ -780,5 +839,6 @@ SceneRoots:
   - {fileID: 136675314}
   - {fileID: 395527431}
   - {fileID: 1457529884}
+  - {fileID: 1860941288}
   - {fileID: 2087619439551754681}
   - {fileID: 1098038493}
