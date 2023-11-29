@@ -78,8 +78,9 @@ public class AgentController : MonoBehaviour{
     string getTrafficLightsEndpoint = "/getTrafficLights";
     string getRoadsEndpoint = "/getRoads";
     string getDestinationsEndpoint = "/getDestinations";
+    string getArrivedCars = "/getArrivedCars";
     string getObstaclesEndpoint = "/getObstacles";
-    AgentsData agentsData, obstacleData, roadsData, destinationData;
+    AgentsData agentsData, obstacleData, roadsData, destinationData, ArrivedCars;
     Dictionary<string, GameObject> agents;
     Dictionary<string, Vector3> prevPositions, currPositions;
 
@@ -150,6 +151,7 @@ public class AgentController : MonoBehaviour{
             Debug.Log(www.error);
         else{
             StartCoroutine(GetAgentsData());
+            StartCoroutine(GetDestroyCars());
         }
     }
 
@@ -170,8 +172,8 @@ public class AgentController : MonoBehaviour{
             Debug.Log(www.error);
         }
         else{
-            Debug.Log("Configuration upload complete!");
-            Debug.Log("Getting Agents positions");
+            // Debug.Log("Configuration upload complete!");
+            // Debug.Log("Getting Agents positions");
 
             // Once the configuration has been sent, it launches a coroutine to get the agents data.
             StartCoroutine(GetAgentsData());
@@ -196,7 +198,7 @@ public class AgentController : MonoBehaviour{
 
             foreach(AgentData agent in agentsData.positions){
                 Vector3 newAgentPosition = new Vector3(agent.x, agent.y, agent.z);
-
+                    // Debug.Log(agent.id);
                     if(!started){
                         prevPositions[agent.id] = newAgentPosition;
                         // Este siguiente instanciate lo tengo que cambiar porque lo hace solo una vez, mientras que 
@@ -208,7 +210,14 @@ public class AgentController : MonoBehaviour{
                         // Esto es que encuentre si existe en el diccionario
                         if(currPositions.TryGetValue(agent.id, out currentPosition))
                             prevPositions[agent.id] = currentPosition;
+                        else{ // Pos si no existe, que lo cree y que lo agregue al diccionario
+                            prevPositions[agent.id] = newAgentPosition;
+                            agents[agent.id] = Instantiate(agentPrefab, newAgentPosition, Quaternion.identity);
+                        }
                         currPositions[agent.id] = newAgentPosition;
+
+                        // Recorrer el diccionario de agents y si no esta, borralo
+
                     }
             }
 
@@ -226,11 +235,34 @@ public class AgentController : MonoBehaviour{
         else{
             obstacleData = JsonUtility.FromJson<AgentsData>(www.downloadHandler.text);
 
-            Debug.Log(obstacleData.positions);
+            // Debug.Log(obstacleData.positions);
 
             foreach(AgentData obstacle in obstacleData.positions){
                 int rand = UnityEngine.Random.Range(0, obstaclePrefab.Length);
                 Instantiate(obstaclePrefab[rand], new Vector3(obstacle.x, obstacle.y, obstacle.z), Quaternion.identity);
+            }
+        }
+    }
+
+    IEnumerator GetDestroyCars(){
+        UnityWebRequest www = UnityWebRequest.Get(serverUrl + getArrivedCars);
+        yield return www.SendWebRequest();
+ 
+        if (www.result != UnityWebRequest.Result.Success)
+            Debug.Log(www.error);
+        else{
+            ArrivedCars = JsonUtility.FromJson<AgentsData>(www.downloadHandler.text);
+
+            Debug.Log("Arrived car: " + ArrivedCars.positions);
+
+            foreach(AgentData arrivedCar in ArrivedCars.positions){
+                // Funcionara?
+                Debug.Log("Destroying car: " + arrivedCar.id);
+                Debug.Log(agents[arrivedCar.id]);
+                Destroy(agents[arrivedCar.id]);
+                agents.Remove(arrivedCar.id);
+                prevPositions.Remove(arrivedCar.id);
+                currPositions.Remove(arrivedCar.id);
             }
         }
     }
@@ -244,7 +276,7 @@ public class AgentController : MonoBehaviour{
         else{
             destinationData = JsonUtility.FromJson<AgentsData>(www.downloadHandler.text);
 
-            Debug.Log(destinationData.positions);
+            // Debug.Log(destinationData.positions);
 
             foreach(AgentData obstacle in destinationData.positions){
                 int rand = UnityEngine.Random.Range(0, obstaclePrefab.Length);
@@ -264,7 +296,7 @@ public class AgentController : MonoBehaviour{
         else{
             roadsData = JsonUtility.FromJson<AgentsData>(www.downloadHandler.text);
 
-            Debug.Log(roadsData.positions);
+            // Debug.Log(roadsData.positions);
 
             foreach(AgentData obstacle in roadsData.positions){
                 Instantiate(floor, new Vector3(obstacle.x, obstacle.y, obstacle.z), Quaternion.identity);

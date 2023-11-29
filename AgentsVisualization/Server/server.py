@@ -63,6 +63,15 @@ def getRoads():
 
         return jsonify({'positions':roadPositions})
 
+@app.route('/getArrivedCars', methods=['GET'])
+def getArrivedCars():
+    global randomModel
+
+    if request.method == 'GET':
+        arrivedCars = [{"id": str(a.unique_id)} for a in randomModel.arrivedCarsList if randomModel.arrivedCarsList]
+
+        return jsonify({'positions':arrivedCars})
+
     
 @app.route('/update', methods=['GET'])
 def updateModel():

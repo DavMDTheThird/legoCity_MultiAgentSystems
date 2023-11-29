@@ -661,7 +661,7 @@ MonoBehaviour:
   - {fileID: 919132149155446097, guid: 1ea63b7a31e1c934793fbf379f36c8df, type: 3}
   agentPrefab: {fileID: 919132149155446097, guid: 16052cff731fccc43855a94cc5d545fc, type: 3}
   floor: {fileID: 3240343348373693069, guid: 646fc54ff3078ce94bbdbd0f0d4c4a05, type: 3}
-  timeToUpdate: 5
+  timeToUpdate: 2
 --- !u!4 &1860941288
 Transform:
   m_ObjectHideFlags: 0
