@@ -88,7 +88,7 @@ public class AgentController : MonoBehaviour{
 
     [SerializeField] GameObject[] obstaclePrefab;
     public GameObject agentPrefab, floor;
-    List<GameObject> deleteCars;
+    List<string> deleteCars;
     public float timeToUpdate = 5.0f;
     private float timer, dt;
 
@@ -98,7 +98,7 @@ public class AgentController : MonoBehaviour{
         destinationData = new AgentsData();
         roadsData = new AgentsData();
 
-        deleteCars = new List<GameObject>();
+        deleteCars = new List<string>();
 
         prevPositions = new Dictionary<string, Vector3>();
         currPositions = new Dictionary<string, Vector3>();
@@ -135,6 +135,7 @@ public class AgentController : MonoBehaviour{
                 // agents[agent.Key].transform.localPosition = interpolated;
                 // if(direction != Vector3.zero) agents[agent.Key].transform.rotation = Quaternion.LookRotation(direction);
             }
+            DestroyCars();
 
             // float t = (timer / timeToUpdate);
             // dt = t * t * ( 3f - 2f*t);
@@ -150,7 +151,6 @@ public class AgentController : MonoBehaviour{
         else{
             StartCoroutine(GetAgentsData());
             StartCoroutine(GetDestroyCars());
-            DestroyCars();
         }
     }
 
@@ -203,6 +203,7 @@ public class AgentController : MonoBehaviour{
                 else{ // Pos si no existe, que lo cree y que lo agregue al diccionario
                     prevPositions[agent.id] = newAgentPosition;
                     agents[agent.id] = Instantiate(agentPrefab, Vector3.zero, Quaternion.identity);
+                    agents[agent.id].name = agent.id;
                     agents[agent.id].GetComponent<moveCar>().Init();
                     agents[agent.id].GetComponent<moveCar>().ApplyTransforms(newAgentPosition, Vector3.zero);
                 }
@@ -234,10 +235,21 @@ public class AgentController : MonoBehaviour{
     }
 
     void DestroyCars(){
-        foreach(GameObject car in deleteCars){
-            Destroy(car);
-            deleteCars.Remove(car);
+        Debug.Log("B:"+deleteCars.Count);
+        for(int i = deleteCars.Count - 1; i >= 0; i--){
+            
+            Destroy(agents[deleteCars[i]]);
+            agents.Remove(deleteCars[i]);
+            currPositions.Remove(deleteCars[i]);
+            prevPositions.Remove(deleteCars[i]);
+            
+            deleteCars.RemoveAt(i);
         }
+        Debug.Log("A:"+deleteCars.Count);
+        //foreach(GameObject car in deleteCars){
+            //Destroy(car);
+            //deleteCars.Remove(car);
+        //}
     }
 
     IEnumerator GetDestroyCars(){
@@ -249,13 +261,10 @@ public class AgentController : MonoBehaviour{
         else{
             ArrivedCars = JsonUtility.FromJson<AgentsData>(www.downloadHandler.text);
 
-            Debug.Log("Arrived car: " + ArrivedCars.positions);
+            Debug.Log(www.downloadHandler.text);
 
             foreach(AgentData arrivedCar in ArrivedCars.positions){
-                deleteCars.Add(agents[arrivedCar.id]);
-                agents.Remove(arrivedCar.id);
-                currPositions.Remove(arrivedCar.id);
-                prevPositions.Remove(arrivedCar.id);
+                deleteCars.Add(arrivedCar.id);
             }
         }
     }
