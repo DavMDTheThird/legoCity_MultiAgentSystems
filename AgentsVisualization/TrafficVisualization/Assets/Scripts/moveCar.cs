@@ -39,6 +39,9 @@ public class moveCar : MonoBehaviour{
         for(int i = 0; i < wheels.Length; i++){
             wheels[i] = Instantiate(wheel_prefav, new Vector3(0f, 0f, 0f), Quaternion.identity);
 
+            // Asigna el padre de las llantas   
+            wheels[i].transform.parent = transform;
+
             // Crea el array de wheels, mesh y baseVertices
             mesh[i] = wheels[i].GetComponentInChildren<MeshFilter>().mesh;
             baseVertices[i] = mesh[i].vertices;
@@ -61,7 +64,7 @@ public class moveCar : MonoBehaviour{
 
     // Update is called once per frame
     public void ApplyTransforms(Vector3 interpolated, Vector3 direction){
-        Debug.Log("ApplyTransforms");
+        //Debug.Log("ApplyTransforms");
         Matrix4x4 composite = DoTransform_Car(interpolated, direction, car_baseVertices, car_newVertices, car_mesh);
         for(int i = 0; i < wheels.Length; i++){
             DoTransform_Wheels(wheelsPos[i], rotationAxis, baseVertices[i], newVertices[i], mesh[i], composite);
