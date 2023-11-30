@@ -8,6 +8,9 @@ import networkx as nx
 class CityModel(Model):
     """ 
         Creates a model based on a city map.
+
+        Args:
+            N: Number of agents in the simulation
     """
     def __init__(self):
 
@@ -17,13 +20,14 @@ class CityModel(Model):
         self.traffic_lights = []
 
         # Load the map file. The map file is a text file where each character represents an agent.
-        with open('city_files/2022_base.txt') as baseFile:
+        with open('city_files/mio.txt') as baseFile:
             lines = baseFile.readlines()
             self.width = len(lines[0])-1
             self.height = len(lines)
             self.numCars = 0
             self.destinationsList = []
             self.arrivedCarsList = []
+            self.continueSimulation = True
 
             self.grid = MultiGrid(self.width, self.height, torus = False) 
             self.schedule = RandomActivation(self)
@@ -67,42 +71,19 @@ class CityModel(Model):
         # print(self.graph.edges())
         # path = nx.astar_path(self.graph, (0,0), (19,1), weight='weight')
         # print(path)
-        # i = self.grid.coord_iter()
 
-        # for agent, (x, y) in i:
-        #     print(agent, (x, y))
-        #     if isinstance(agent, Car):
-        #         print(agent.unique_id)
-                # agent.possibleSteps = self.get_nextPossibleSteps(agent)
-                # print(agent.unique_id, agent.possibleSteps)
-
-        # print("Aloo1", list(next(i)))
-        # print("Aloo2", list(next(i)))
-        # print("Aloo3", list(next(i)))
-        # print("Aloo4", list(next(i)))
-        # print("Aloo5", list(next(i)))
-
+        # self.num_agents = N
         self.running = True
 
     def step(self):
         '''Advance the model by one step.'''
+        self.continueSimulation = False
         self.deleteCars()
         self.schedule.step()
         self.datacollector.collect(self)
 
-        # i = self.grid.coord_iter()
-
-        # for agent, (x, y) in i:
-        #     # print(agent, (x, y))
-        #     # print(agent[0])
-        #     if isinstance(agent[0], Road):
-        #         print(agent[0].unique_id)
-
-        print("---------------- My Agents")
-        for agent in self.schedule.agents:
-            # print(agent)
-            if isinstance(agent, Car):
-                print(agent.unique_id, agent.pos)
+        if self.schedule.steps-1 % 3 == 0:
+            self.checkCars()
 
     
     def get_nextPossibleSteps(self, agent):
@@ -216,7 +197,6 @@ class CityModel(Model):
     def deleteCars(self):
         if self.arrivedCarsList:
             for i in self.arrivedCarsList:
-                # print(i.unique_id)
                 self.grid.remove_agent(i)
                 self.schedule.remove(i)
             
@@ -241,5 +221,11 @@ class CityModel(Model):
                             print(x.unique_id)
                     self.running = False
                     return True
+                
+    def checkCars(self):
+        if not self.continueSimulation:
+            self.running = False
+            return
+
 
         

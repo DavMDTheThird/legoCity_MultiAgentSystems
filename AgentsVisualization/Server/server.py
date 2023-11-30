@@ -40,7 +40,10 @@ def getTrafficLights():
     global randomModel
 
     if request.method == 'GET':
-        trafficLights = [{"id": str(a.unique_id), "x": a.pos[0], "y":1, "z":a.pos[1], "state": a.state, "direction": a.direction} for a in randomModel.schedule.agents if isinstance(a, Traffic_Light)]
+        trafficLights = [{"id": str(a.unique_id), "x": a.pos[0], "y":1, "z":a.pos[1], 
+                          "state": a.state, "direction": a.direction, 
+                          "timeToChange": a.timeToChange} 
+                          for a in randomModel.schedule.agents if isinstance(a, Traffic_Light)]
 
         return jsonify({'positions':trafficLights})
 

@@ -4,6 +4,7 @@ from mesa.space import MultiGrid
 from randomAgents.agent import *
 import json
 import networkx as nx
+import requests
 
 class CityModel(Model):
     """ 
@@ -27,6 +28,8 @@ class CityModel(Model):
             self.numCars = 0
             self.destinationsList = []
             self.arrivedCarsList = []
+
+            self.numArrivedCars = 0
 
             self.grid = MultiGrid(self.width, self.height, torus = False) 
             self.schedule = RandomActivation(self)
@@ -76,9 +79,16 @@ class CityModel(Model):
 
     def step(self):
         '''Advance the model by one step.'''
+        print(f"Step: {self.schedule.steps}")
         self.deleteCars()
         self.schedule.step()
         self.datacollector.collect(self)
+
+        if self.schedule.steps % 100 == 0:
+            self.concurso()
+
+        if self.schedule.steps == 1001:
+            self.running = False
 
     
     def get_nextPossibleSteps(self, agent):
@@ -192,6 +202,7 @@ class CityModel(Model):
     def deleteCars(self):
         if self.arrivedCarsList:
             for i in self.arrivedCarsList:
+                self.numArrivedCars += 1
                 self.grid.remove_agent(i)
                 self.schedule.remove(i)
             
@@ -217,4 +228,25 @@ class CityModel(Model):
                     self.running = False
                     return True
 
+
+    def concurso(self):
+
+            url = "http://52.1.3.19:8585/api/"
+            endpoint = "attempts"
+
+            data = {
+                "year" : 2023,
+                "classroom" : 301,
+                "name" : "LegoCity",
+                "num_cars": self.numArrivedCars
+            }
+
+            headers = {
+                "Content-Type": "application/json"
+            }
+
+            response = requests.post(url+endpoint, data=json.dumps(data), headers=headers)
+
+            print("Request " + "successful" if response.status_code == 200 else "failed", "Status code:", response.status_code)
+            print("Response:", response.json())
         

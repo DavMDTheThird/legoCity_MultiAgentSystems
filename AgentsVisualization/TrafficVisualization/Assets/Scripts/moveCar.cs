@@ -29,6 +29,8 @@ public class moveCar : MonoBehaviour{
 
     Vector3[] wheelsPos = new Vector3[4];
 
+    // Vector3 prevInterpolation = Vector3.zero;
+
     // Start is called before the first frame update
     public void Init(){
         wheelsPos[0] = new Vector3(-0.22f, 0.05f, 0.32f);
@@ -65,7 +67,10 @@ public class moveCar : MonoBehaviour{
     // Update is called once per frame
     public void ApplyTransforms(Vector3 interpolated, Vector3 direction){
         //Debug.Log("ApplyTransforms");
+        // Coche
         Matrix4x4 composite = DoTransform_Car(interpolated, direction, car_baseVertices, car_newVertices, car_mesh);
+
+        // Llantas
         for(int i = 0; i < wheels.Length; i++){
             DoTransform_Wheels(wheelsPos[i], rotationAxis, baseVertices[i], newVertices[i], mesh[i], composite);
         }

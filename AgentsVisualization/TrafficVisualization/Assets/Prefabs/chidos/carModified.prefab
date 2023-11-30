@@ -106,5 +106,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   wheel_prefav: {fileID: 919132149155446097, guid: 90023c137e5a51b41a6f43704f538ab1, type: 3}
-  angle: 0
+  angle: 600
   rotationAxis: 0

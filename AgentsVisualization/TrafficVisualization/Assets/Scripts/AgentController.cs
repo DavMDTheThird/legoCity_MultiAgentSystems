@@ -20,14 +20,28 @@ public class AgentData{
         y (float): The y coordinate of the agent.
         z (float): The z coordinate of the agent.
     */
-    public string id;
+    public string id, direction;
     public float x, y, z;
+    public bool state;
+
+    public AgentData(string id){
+        this.id = id;
+    }
 
     public AgentData(string id, float x, float y, float z){
         this.id = id;
         this.x = x;
         this.y = y;
         this.z = z;
+    }
+
+    public AgentData(string id, float x, float y, float z, bool state, string direction){
+        this.id = id;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.state = state;
+        this.direction = direction;
     }
 }
 
@@ -80,15 +94,15 @@ public class AgentController : MonoBehaviour{
     string getDestinationsEndpoint = "/getDestinations";
     string getArrivedCars = "/getArrivedCars";
     string getObstaclesEndpoint = "/getObstacles";
-    AgentsData agentsData, obstacleData, roadsData, destinationData, ArrivedCars;
-    Dictionary<string, GameObject> agents;
+    AgentsData agentsData, obstacleData, roadsData, destinationData, ArrivedCars, trafficLightsData;
+    Dictionary<string, GameObject> agentsDIC, trafficLightsDIC;
     Dictionary<string, Vector3> prevPositions, currPositions;
 
     bool updated = false, started = false;
 
     [SerializeField] GameObject[] obstaclePrefab;
-    public GameObject agentPrefab, floor;
-    List<string> deleteCars;
+    public GameObject agentPrefab, floor, trafficLightPrefab;
+    List<GameObject> deleteCars;
     public float timeToUpdate = 5.0f;
     private float timer, dt;
 
@@ -98,12 +112,13 @@ public class AgentController : MonoBehaviour{
         destinationData = new AgentsData();
         roadsData = new AgentsData();
 
-        deleteCars = new List<string>();
+        deleteCars = new List<GameObject>();
 
         prevPositions = new Dictionary<string, Vector3>();
         currPositions = new Dictionary<string, Vector3>();
 
-        agents = new Dictionary<string, GameObject>();
+        agentsDIC = new Dictionary<string, GameObject>();
+        trafficLightsDIC = new Dictionary<string, GameObject>();
         
         timer = timeToUpdate;
 
@@ -131,11 +146,10 @@ public class AgentController : MonoBehaviour{
                 Vector3 interpolated = Vector3.Lerp(previousPosition, currentPosition, dt);
                 Vector3 direction = currentPosition - interpolated;
 
-                agents[agent.Key].GetComponent<moveCar>().ApplyTransforms(interpolated, direction);
+                agentsDIC[agent.Key].GetComponent<moveCar>().ApplyTransforms(interpolated, direction);
                 // agents[agent.Key].transform.localPosition = interpolated;
                 // if(direction != Vector3.zero) agents[agent.Key].transform.rotation = Quaternion.LookRotation(direction);
             }
-            DestroyCars();
 
             // float t = (timer / timeToUpdate);
             // dt = t * t * ( 3f - 2f*t);
@@ -151,6 +165,8 @@ public class AgentController : MonoBehaviour{
         else{
             StartCoroutine(GetAgentsData());
             StartCoroutine(GetDestroyCars());
+            StartCoroutine(ChangeTrafficLights());
+            DestroyCars();
         }
     }
 
@@ -175,6 +191,7 @@ public class AgentController : MonoBehaviour{
             // Debug.Log("Getting Agents positions");
 
             // Once the configuration has been sent, it launches a coroutine to get the agents data.
+            StartCoroutine(GetTrafficLights());
             StartCoroutine(GetAgentsData());
             StartCoroutine(GetObstacleData());
             StartCoroutine(GetDestinationsData());
@@ -202,10 +219,9 @@ public class AgentController : MonoBehaviour{
                     prevPositions[agent.id] = currentPosition;
                 else{ // Pos si no existe, que lo cree y que lo agregue al diccionario
                     prevPositions[agent.id] = newAgentPosition;
-                    agents[agent.id] = Instantiate(agentPrefab, Vector3.zero, Quaternion.identity);
-                    agents[agent.id].name = agent.id;
-                    agents[agent.id].GetComponent<moveCar>().Init();
-                    agents[agent.id].GetComponent<moveCar>().ApplyTransforms(newAgentPosition, Vector3.zero);
+                    agentsDIC[agent.id] = Instantiate(agentPrefab, Vector3.zero, Quaternion.identity);
+                    agentsDIC[agent.id].GetComponent<moveCar>().Init();
+                    agentsDIC[agent.id].GetComponent<moveCar>().ApplyTransforms(newAgentPosition, Vector3.zero);
                 }
                 currPositions[agent.id] = newAgentPosition;
             }
@@ -235,21 +251,10 @@ public class AgentController : MonoBehaviour{
     }
 
     void DestroyCars(){
-        Debug.Log("B:"+deleteCars.Count);
-        for(int i = deleteCars.Count - 1; i >= 0; i--){
-            
-            Destroy(agents[deleteCars[i]]);
-            agents.Remove(deleteCars[i]);
-            currPositions.Remove(deleteCars[i]);
-            prevPositions.Remove(deleteCars[i]);
-            
-            deleteCars.RemoveAt(i);
+        foreach(GameObject car in deleteCars){
+            Destroy(car);
+            deleteCars.Remove(car);
         }
-        Debug.Log("A:"+deleteCars.Count);
-        //foreach(GameObject car in deleteCars){
-            //Destroy(car);
-            //deleteCars.Remove(car);
-        //}
     }
 
     IEnumerator GetDestroyCars(){
@@ -261,10 +266,13 @@ public class AgentController : MonoBehaviour{
         else{
             ArrivedCars = JsonUtility.FromJson<AgentsData>(www.downloadHandler.text);
 
-            Debug.Log(www.downloadHandler.text);
+            // Debug.Log("Arrived car: " + ArrivedCars.positions);
 
             foreach(AgentData arrivedCar in ArrivedCars.positions){
-                deleteCars.Add(arrivedCar.id);
+                deleteCars.Add(agentsDIC[arrivedCar.id]);
+                agentsDIC.Remove(arrivedCar.id);
+                currPositions.Remove(arrivedCar.id);
+                prevPositions.Remove(arrivedCar.id);
             }
         }
     }
@@ -303,6 +311,43 @@ public class AgentController : MonoBehaviour{
 
             foreach(AgentData obstacle in roadsData.positions){
                 Instantiate(floor, new Vector3(obstacle.x, obstacle.y - 0.04f, obstacle.z), Quaternion.identity);
+            }
+        }
+    }
+
+    IEnumerator GetTrafficLights(){
+        UnityWebRequest www = UnityWebRequest.Get(serverUrl + getTrafficLightsEndpoint);
+        yield return www.SendWebRequest();
+ 
+        if (www.result != UnityWebRequest.Result.Success)
+            Debug.Log(www.error);
+        else{
+            trafficLightsData = JsonUtility.FromJson<AgentsData>(www.downloadHandler.text);
+
+            foreach(AgentData tf in trafficLightsData.positions){
+                trafficLightsDIC[tf.id] = Instantiate(trafficLightPrefab, new Vector3(tf.x, tf.y, tf.z), Quaternion.Euler(-90, 0, 0));
+                trafficLightsDIC[tf.id].GetComponentInChildren<Light>().color = Color.red;
+
+            }
+        }
+    }
+
+    IEnumerator ChangeTrafficLights(){
+        UnityWebRequest www = UnityWebRequest.Get(serverUrl + getTrafficLightsEndpoint);
+        yield return www.SendWebRequest();
+ 
+        if (www.result != UnityWebRequest.Result.Success)
+            Debug.Log(www.error);
+        else{
+            trafficLightsData = JsonUtility.FromJson<AgentsData>(www.downloadHandler.text);
+
+            foreach(AgentData tf in trafficLightsData.positions){
+                if(tf.state){
+                    trafficLightsDIC[tf.id].GetComponentInChildren<Light>().color = new Color32(61, 161, 27, 255);
+                }
+                else{
+                    trafficLightsDIC[tf.id].GetComponentInChildren<Light>().color = Color.red;
+                }
             }
         }
     }
