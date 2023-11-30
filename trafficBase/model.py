@@ -216,6 +216,7 @@ class CityModel(Model):
     def deleteCars(self):
         if self.arrivedCarsList:
             for i in self.arrivedCarsList:
+                # print(i.unique_id)
                 self.grid.remove_agent(i)
                 self.schedule.remove(i)
             

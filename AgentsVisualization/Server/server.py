@@ -68,7 +68,7 @@ def getArrivedCars():
     global randomModel
 
     if request.method == 'GET':
-        arrivedCars = [{"id": str(a.unique_id)} for a in randomModel.arrivedCarsList if randomModel.arrivedCarsList]
+        arrivedCars = [{"id": str(a.unique_id)} for a in randomModel.arrivedCarsList]
 
         return jsonify({'positions':arrivedCars})
 

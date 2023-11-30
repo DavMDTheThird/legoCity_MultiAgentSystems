@@ -88,6 +88,7 @@ public class AgentController : MonoBehaviour{
 
     [SerializeField] GameObject[] obstaclePrefab;
     public GameObject agentPrefab, floor;
+    List<GameObject> deleteCars;
     public float timeToUpdate = 5.0f;
     private float timer, dt;
 
@@ -97,16 +98,12 @@ public class AgentController : MonoBehaviour{
         destinationData = new AgentsData();
         roadsData = new AgentsData();
 
+        deleteCars = new List<GameObject>();
+
         prevPositions = new Dictionary<string, Vector3>();
         currPositions = new Dictionary<string, Vector3>();
 
         agents = new Dictionary<string, GameObject>();
-
-        // int width = 24;
-        // int height = 25;
-        
-        // floor.transform.localScale = new Vector3((float)width/10, 1, (float)height/10);
-        // floor.transform.localPosition = new Vector3((float)width/2-0.5f, 0, (float)height/2-0.5f);
         
         timer = timeToUpdate;
 
@@ -134,8 +131,9 @@ public class AgentController : MonoBehaviour{
                 Vector3 interpolated = Vector3.Lerp(previousPosition, currentPosition, dt);
                 Vector3 direction = currentPosition - interpolated;
 
-                agents[agent.Key].transform.localPosition = interpolated;
-                if(direction != Vector3.zero) agents[agent.Key].transform.rotation = Quaternion.LookRotation(direction);
+                agents[agent.Key].GetComponent<moveCar>().ApplyTransforms(interpolated, direction);
+                // agents[agent.Key].transform.localPosition = interpolated;
+                // if(direction != Vector3.zero) agents[agent.Key].transform.rotation = Quaternion.LookRotation(direction);
             }
 
             // float t = (timer / timeToUpdate);
@@ -152,6 +150,7 @@ public class AgentController : MonoBehaviour{
         else{
             StartCoroutine(GetAgentsData());
             StartCoroutine(GetDestroyCars());
+            DestroyCars();
         }
     }
 
@@ -192,33 +191,22 @@ public class AgentController : MonoBehaviour{
         if (www.result != UnityWebRequest.Result.Success)
             Debug.Log(www.error);
         else{
-            // Once the data has been received, it is stored in the agentsData variable.
-            // Then, it iterates over the agentsData.positions list to update the agents positions.
             agentsData = JsonUtility.FromJson<AgentsData>(www.downloadHandler.text);
 
             foreach(AgentData agent in agentsData.positions){
                 Vector3 newAgentPosition = new Vector3(agent.x, agent.y, agent.z);
-                    // Debug.Log(agent.id);
-                    if(!started){
-                        prevPositions[agent.id] = newAgentPosition;
-                        // Este siguiente instanciate lo tengo que cambiar porque lo hace solo una vez, mientras que 
-                        // el mio va a instanciar un coche cada vez que no lo encuentre (el id) en el diccionario
-                        agents[agent.id] = Instantiate(agentPrefab, newAgentPosition, Quaternion.identity);
-                    }
-                    else{
-                        Vector3 currentPosition = new Vector3();
-                        // Esto es que encuentre si existe en el diccionario
-                        if(currPositions.TryGetValue(agent.id, out currentPosition))
-                            prevPositions[agent.id] = currentPosition;
-                        else{ // Pos si no existe, que lo cree y que lo agregue al diccionario
-                            prevPositions[agent.id] = newAgentPosition;
-                            agents[agent.id] = Instantiate(agentPrefab, newAgentPosition, Quaternion.identity);
-                        }
-                        currPositions[agent.id] = newAgentPosition;
-
-                        // Recorrer el diccionario de agents y si no esta, borralo
-
-                    }
+                    
+                Vector3 currentPosition = new Vector3();
+                // Esto es que encuentre si existe en el diccionario
+                if(currPositions.TryGetValue(agent.id, out currentPosition))
+                    prevPositions[agent.id] = currentPosition;
+                else{ // Pos si no existe, que lo cree y que lo agregue al diccionario
+                    prevPositions[agent.id] = newAgentPosition;
+                    agents[agent.id] = Instantiate(agentPrefab, Vector3.zero, Quaternion.identity);
+                    agents[agent.id].GetComponent<moveCar>().Init();
+                    agents[agent.id].GetComponent<moveCar>().ApplyTransforms(newAgentPosition, Vector3.zero);
+                }
+                currPositions[agent.id] = newAgentPosition;
             }
 
             updated = true;
@@ -240,7 +228,15 @@ public class AgentController : MonoBehaviour{
             foreach(AgentData obstacle in obstacleData.positions){
                 int rand = UnityEngine.Random.Range(0, obstaclePrefab.Length);
                 Instantiate(obstaclePrefab[rand], new Vector3(obstacle.x, obstacle.y, obstacle.z), Quaternion.identity);
+                Instantiate(floor, new Vector3(obstacle.x, obstacle.y - 0.04f, obstacle.z), Quaternion.identity);
             }
+        }
+    }
+
+    void DestroyCars(){
+        foreach(GameObject car in deleteCars){
+            Destroy(car);
+            deleteCars.Remove(car);
         }
     }
 
@@ -256,13 +252,10 @@ public class AgentController : MonoBehaviour{
             Debug.Log("Arrived car: " + ArrivedCars.positions);
 
             foreach(AgentData arrivedCar in ArrivedCars.positions){
-                // Funcionara?
-                Debug.Log("Destroying car: " + arrivedCar.id);
-                Debug.Log(agents[arrivedCar.id]);
-                Destroy(agents[arrivedCar.id]);
+                deleteCars.Add(agents[arrivedCar.id]);
                 agents.Remove(arrivedCar.id);
-                prevPositions.Remove(arrivedCar.id);
                 currPositions.Remove(arrivedCar.id);
+                prevPositions.Remove(arrivedCar.id);
             }
         }
     }
@@ -282,6 +275,7 @@ public class AgentController : MonoBehaviour{
                 int rand = UnityEngine.Random.Range(0, obstaclePrefab.Length);
                 GameObject tile = Instantiate(obstaclePrefab[rand], new Vector3(obstacle.x, obstacle.y, obstacle.z), Quaternion.identity);
                 tile.GetComponentInChildren<Renderer>().materials[0].color = Color.red;
+                Instantiate(floor, new Vector3(obstacle.x, obstacle.y - 0.04f, obstacle.z), Quaternion.identity);
                 // tile.transform.parent = transform; // Este no se si lo necesite (creo que no)
             }
         }
@@ -299,7 +293,7 @@ public class AgentController : MonoBehaviour{
             // Debug.Log(roadsData.positions);
 
             foreach(AgentData obstacle in roadsData.positions){
-                Instantiate(floor, new Vector3(obstacle.x, obstacle.y, obstacle.z), Quaternion.identity);
+                Instantiate(floor, new Vector3(obstacle.x, obstacle.y - 0.04f, obstacle.z), Quaternion.identity);
             }
         }
     }
