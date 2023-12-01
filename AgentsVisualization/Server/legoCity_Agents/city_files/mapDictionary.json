@@ -1,0 +1,21 @@
+{
+    ">" : "Right",
+    "<" : "Left",
+    "^" : "Up",
+    "v" : "Down",
+    "g" : "Up-Left",
+    "h" : "Up-Right",
+    "b" : "Down-Left",
+    "n" : "Down-Right",
+    "R" : [7, "Right"],
+    "r" : [5, "Right"],
+    "L" : [7, "Left"],
+    "l" : [5, "Left"],
+    "U" : [7, "Up"],
+    "u" : [5, "Up"],
+    "D" : [7, "Down"],
+    "d" : [5, "Down"],
+    "#" : "Obstacle",
+    "T" : "Destination",
+    "C" : [5, "CarGenerator"]
+}

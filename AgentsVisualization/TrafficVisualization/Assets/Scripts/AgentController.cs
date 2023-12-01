@@ -11,19 +11,11 @@ using UnityEngine.Networking;
 
 [Serializable]
 public class AgentData{
-    /*
-    The AgentData class is used to store the data of each agent.
-    
-    Attributes:
-        id (string): The id of the agent.
-        x (float): The x coordinate of the agent.
-        y (float): The y coordinate of the agent.
-        z (float): The z coordinate of the agent.
-    */
     public string id, direction;
     public float x, y, z;
     public bool state;
 
+    // Diferentes tipos de constructores para los diferentes tipos de datos que se pueden recibir
     public AgentData(string id){
         this.id = id;
     }
@@ -47,12 +39,6 @@ public class AgentData{
 
 [Serializable]
 public class AgentsData{
-    /*
-    The AgentsData class is used to store the data of all the agents.
-
-    Attributes:
-        positions (list): A list of AgentData objects.
-    */
     public List<AgentData> positions;
 
     public AgentsData() => this.positions = new List<AgentData>();
@@ -78,13 +64,13 @@ public class AgentController : MonoBehaviour{
         agentPrefab (GameObject): The prefab of the agents.
         obstaclePrefab (GameObject): The prefab of the obstacles.
         floor (GameObject): The floor of the simulation.
-        NAgents (int): The number of agents.
         width (int): The width of the simulation.
         height (int): The height of the simulation.
         timeToUpdate (float): The time to update the simulation.
         timer (float): The timer to update the simulation.
         dt (float): The delta time.
     */
+    // Endopoints   
     string serverUrl = "http://localhost:8585";
     string sendConfigEndpoint = "/init";
     string updateEndpoint = "/update";
@@ -94,15 +80,21 @@ public class AgentController : MonoBehaviour{
     string getDestinationsEndpoint = "/getDestinations";
     string getArrivedCars = "/getArrivedCars";
     string getObstaclesEndpoint = "/getObstacles";
+    // Posibles AgentsData types para recoleccion de información
     AgentsData agentsData, obstacleData, roadsData, destinationData, ArrivedCars, trafficLightsData;
+    // Diccionarios
     Dictionary<string, GameObject> agentsDIC, trafficLightsDIC;
     Dictionary<string, Vector3> prevPositions, currPositions;
 
+    // Varaiables para el inicio y update
     bool updated = false, started = false;
 
+    // Prefabs
     [SerializeField] GameObject[] obstaclePrefab;
     public GameObject agentPrefab, floor, trafficLightPrefab;
+    // Lista para borrar coches
     List<GameObject> deleteCars;
+    // Variables para el update
     public float timeToUpdate = 5.0f;
     private float timer, dt;
 
@@ -147,8 +139,8 @@ public class AgentController : MonoBehaviour{
                 Vector3 direction = currentPosition - interpolated;
 
                 agentsDIC[agent.Key].GetComponent<moveCar>().ApplyTransforms(interpolated, direction);
-                // agents[agent.Key].transform.localPosition = interpolated;
-                // if(direction != Vector3.zero) agents[agent.Key].transform.rotation = Quaternion.LookRotation(direction);
+                // agentsDIC[agent.Key].transform.localPosition = interpolated;
+                // if(direction != Vector3.zero) agentsDIC[agent.Key].transform.rotation = Quaternion.LookRotation(direction);
             }
 
             // float t = (timer / timeToUpdate);
@@ -191,6 +183,7 @@ public class AgentController : MonoBehaviour{
             // Debug.Log("Getting Agents positions");
 
             // Once the configuration has been sent, it launches a coroutine to get the agents data.
+            // Inicializar todo el mapa
             StartCoroutine(GetTrafficLights());
             StartCoroutine(GetAgentsData());
             StartCoroutine(GetObstacleData());
@@ -217,7 +210,7 @@ public class AgentController : MonoBehaviour{
                 // Esto es que encuentre si existe en el diccionario
                 if(currPositions.TryGetValue(agent.id, out currentPosition))
                     prevPositions[agent.id] = currentPosition;
-                else{ // Pos si no existe, que lo cree y que lo agregue al diccionario
+                else{ // Si no existe, que lo cree y que lo agregue al diccionario
                     prevPositions[agent.id] = newAgentPosition;
                     agentsDIC[agent.id] = Instantiate(agentPrefab, Vector3.zero, Quaternion.identity);
                     agentsDIC[agent.id].GetComponent<moveCar>().Init();
@@ -240,8 +233,6 @@ public class AgentController : MonoBehaviour{
         else{
             obstacleData = JsonUtility.FromJson<AgentsData>(www.downloadHandler.text);
 
-            // Debug.Log(obstacleData.positions);
-
             foreach(AgentData obstacle in obstacleData.positions){
                 int rand = UnityEngine.Random.Range(0, obstaclePrefab.Length);
                 Instantiate(obstaclePrefab[rand], new Vector3(obstacle.x, obstacle.y, obstacle.z), Quaternion.identity);
@@ -252,7 +243,9 @@ public class AgentController : MonoBehaviour{
 
     void DestroyCars(){
         foreach(GameObject car in deleteCars){
+            // Destruir objeto
             Destroy(car);
+            // Quitarlo de la lista
             deleteCars.Remove(car);
         }
     }
@@ -266,10 +259,10 @@ public class AgentController : MonoBehaviour{
         else{
             ArrivedCars = JsonUtility.FromJson<AgentsData>(www.downloadHandler.text);
 
-            // Debug.Log("Arrived car: " + ArrivedCars.positions);
-
             foreach(AgentData arrivedCar in ArrivedCars.positions){
+                // Agregarlo a la lista de coches a destruir
                 deleteCars.Add(agentsDIC[arrivedCar.id]);
+                // Eliminarlo de los diccionarios
                 agentsDIC.Remove(arrivedCar.id);
                 currPositions.Remove(arrivedCar.id);
                 prevPositions.Remove(arrivedCar.id);
@@ -286,14 +279,11 @@ public class AgentController : MonoBehaviour{
         else{
             destinationData = JsonUtility.FromJson<AgentsData>(www.downloadHandler.text);
 
-            // Debug.Log(destinationData.positions);
-
             foreach(AgentData obstacle in destinationData.positions){
                 int rand = UnityEngine.Random.Range(0, obstaclePrefab.Length);
                 GameObject tile = Instantiate(obstaclePrefab[rand], new Vector3(obstacle.x, obstacle.y, obstacle.z), Quaternion.identity);
                 tile.GetComponentInChildren<Renderer>().materials[0].color = Color.red;
                 Instantiate(floor, new Vector3(obstacle.x, obstacle.y - 0.04f, obstacle.z), Quaternion.identity);
-                // tile.transform.parent = transform; // Este no se si lo necesite (creo que no)
             }
         }
     }
@@ -306,8 +296,6 @@ public class AgentController : MonoBehaviour{
             Debug.Log(www.error);
         else{
             roadsData = JsonUtility.FromJson<AgentsData>(www.downloadHandler.text);
-
-            // Debug.Log(roadsData.positions);
 
             foreach(AgentData obstacle in roadsData.positions){
                 Instantiate(floor, new Vector3(obstacle.x, obstacle.y - 0.04f, obstacle.z), Quaternion.identity);
@@ -325,9 +313,26 @@ public class AgentController : MonoBehaviour{
             trafficLightsData = JsonUtility.FromJson<AgentsData>(www.downloadHandler.text);
 
             foreach(AgentData tf in trafficLightsData.positions){
-                trafficLightsDIC[tf.id] = Instantiate(trafficLightPrefab, new Vector3(tf.x, tf.y, tf.z), Quaternion.Euler(-90, 0, 0));
-                trafficLightsDIC[tf.id].GetComponentInChildren<Light>().color = Color.red;
-
+                if (tf.direction == "Right"){
+                    trafficLightsDIC[tf.id] = Instantiate(trafficLightPrefab, new Vector3(tf.x, tf.y, tf.z - 0.5f), Quaternion.Euler(-90, 0, 0));
+                    trafficLightsDIC[tf.id].GetComponentInChildren<Light>().color = Color.red;
+                }
+                else if (tf.direction == "Left"){
+                    trafficLightsDIC[tf.id] = Instantiate(trafficLightPrefab, new Vector3(tf.x, tf.y, tf.z - 0.5f), Quaternion.Euler(-90, 180, 0));
+                    trafficLightsDIC[tf.id].GetComponentInChildren<Light>().color = Color.red;
+                }
+                else if (tf.direction == "Down"){
+                    trafficLightsDIC[tf.id] = Instantiate(trafficLightPrefab, new Vector3(tf.x, tf.y, tf.z - 0.5f), Quaternion.Euler(-90, 0, 0));
+                    trafficLightsDIC[tf.id].GetComponentInChildren<Light>().color = Color.red;
+                }
+                else if (tf.direction == "Up"){
+                    trafficLightsDIC[tf.id] = Instantiate(trafficLightPrefab, new Vector3(tf.x, tf.y, tf.z - 0.5f), Quaternion.Euler(-90, -90, 0));
+                    trafficLightsDIC[tf.id].GetComponentInChildren<Light>().color = Color.red;
+                }
+                else{
+                    trafficLightsDIC[tf.id] = Instantiate(trafficLightPrefab, new Vector3(tf.x, tf.y, tf.z - 0.5f), Quaternion.Euler(-90, 0, 0));
+                    trafficLightsDIC[tf.id].GetComponentInChildren<Light>().color = Color.red;
+                }
             }
         }
     }

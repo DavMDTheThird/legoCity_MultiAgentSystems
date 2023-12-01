@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
-from randomAgents.model import CityModel
-from randomAgents.agent import Car, Traffic_Light, Destination, Obstacle, Road, Car_Generator
+from legoCity_Agents.model import CityModel
+from legoCity_Agents.agent import Car, Traffic_Light, Destination, Obstacle, Road, Car_Generator
 
 app = Flask("Traffic example")
 

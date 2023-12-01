@@ -230,21 +230,13 @@ class Car_Generator(Agent):
         self.direction = list_TimeToGenerate_Direction[1]
 
     def generate_Car(self, model):
-        colition = True
-
-        if len(model.grid[self.pos[0]][self.pos[1]]) >= 3:
-            colition = False
-
-        # for i in model.grid[self.pos[0]][self.pos[1]]:
-        #     if isinstance(i, Car):
-        #         colition = False
-        if colition:
+        # print(len(model.grid[self.pos[0]][self.pos[1]]))
+        if len(model.grid[self.pos[0]][self.pos[1]]) <= 1:
             destinationAgent = random.choice(model.destinationsList)
             agent = Car(f"c_{self.pos[0]} {self.pos[1]} {model.numCars +1000}", model, destinationAgent)
             model.numCars += 1
             model.grid.place_agent(agent, self.pos)
             model.schedule.add(agent)
-            model.continueSimulation = True
 
 
     def step(self):
