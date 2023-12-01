@@ -4,7 +4,7 @@ from mesa.space import MultiGrid
 from legoCity_Agents.agent import *
 import json
 import networkx as nx
-import requests
+# import requests
 
 class CityModel(Model):
     """ 

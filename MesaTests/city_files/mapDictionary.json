@@ -17,5 +17,5 @@
     "d" : [5, "Down"],
     "#" : "Obstacle",
     "T" : "Destination",
-    "C" : [1, "CarGenerator"]
+    "C" : [5, "CarGenerator"]
 }
